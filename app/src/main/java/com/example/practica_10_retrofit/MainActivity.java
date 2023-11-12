@@ -5,11 +5,23 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.TextView;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+import retrofit2.http.POST;
+import retrofit2.http.Path;
+import retrofit2.http.GET;
+
 public class MainActivity extends AppCompatActivity {
 
     interface RequestUser{
         @GET("/api/users/{id}")
         Call<UserData> getUser(@Path("id") int id);
+
+        @POST("/api/users")
+        Call<UserData> PostUser(@Path("id") int id);
     }
     TextView textView;
     @Override
@@ -23,5 +35,19 @@ public class MainActivity extends AppCompatActivity {
                 .baseUrl("https://reqres.in")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
+
+        RequestUser requestUser = retrofit.create(RequestUser.class);
+
+        requestUser.getUser(3).enqueue(new Callback<UserData>() {
+            @Override
+            public void onResponse(Call<UserData> call, Response<UserData> response) {
+                textView.setText(response.body().data.first_name);
+            }
+
+            @Override
+            public void onFailure(Call<UserData> call, Throwable t) {
+                textView.setText(t.getMessage());
+            }
+        });
     }
 }
